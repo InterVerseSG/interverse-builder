@@ -28,6 +28,7 @@ class UnrealInstruction(BaseModel):
     action: Action
     message: str
     target: str | None = None
+    navigation_anchor: str | None = None
     blueprint_class: str | None = None
     quantity: int | None = None
     location: str | None = None
