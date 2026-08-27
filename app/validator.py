@@ -1,9 +1,31 @@
 from app.catalog import CATALOG
+from app.locations import resolve_location
 from app.schemas import BuildCommand, UnrealInstruction
 
 
 def validate_command(command: BuildCommand) -> UnrealInstruction:
-    if command.action in {"answer", "navigate", "open_panel"}:
+    if command.action == "navigate":
+        destination = resolve_location(command.target)
+        if destination is None:
+            return UnrealInstruction(
+                accepted=False,
+                action=command.action,
+                message=f"Unknown or unregistered navigation target: {command.target}",
+                target=command.target,
+                location=command.location,
+            )
+
+        return UnrealInstruction(
+            accepted=True,
+            action=command.action,
+            message=command.response or "Navigation command accepted.",
+            target=destination.canonical_id,
+            navigation_anchor=destination.navigation_anchor,
+            location=command.location,
+            requires_confirmation=False,
+        )
+
+    if command.action in {"answer", "open_panel"}:
         return UnrealInstruction(
             accepted=True,
             action=command.action,
