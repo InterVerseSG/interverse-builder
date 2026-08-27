@@ -11,6 +11,37 @@ def test_health() -> None:
     assert response.json() == {"status": "healthy"}
 
 
+def test_navigation_maps_spanish_alias_to_anchor() -> None:
+    response = client.post(
+        "/api/v1/build/validate",
+        json={
+            "action": "navigate",
+            "response": "Te llevo al Salón 101.",
+            "target": "Salón 101",
+            "location": "pasillo norte",
+        },
+    )
+    payload = response.json()
+    assert response.status_code == 200
+    assert payload["accepted"] is True
+    assert payload["target"] == "Classroom101"
+    assert payload["navigation_anchor"] == "NAV_Classroom101"
+
+
+def test_navigation_rejects_unknown_destination() -> None:
+    response = client.post(
+        "/api/v1/build/validate",
+        json={
+            "action": "navigate",
+            "target": "Biblioteca",
+        },
+    )
+    payload = response.json()
+    assert response.status_code == 200
+    assert payload["accepted"] is False
+    assert payload["navigation_anchor"] is None
+
+
 def test_create_chairs_maps_to_blueprint() -> None:
     response = client.post(
         "/api/v1/build/validate",
